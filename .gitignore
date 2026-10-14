@@ -1,0 +1,36 @@
+# Official course dataset
+/assignment2/
+/assignment2_backup/
+/assignment2_new/
+
+# Local instructor reference and agent handoff notes
+/Big Data Course - Assignment 2.pdf
+/docs/agent/
+/docs/ai/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.ipynb_checkpoints/
+
+# Dataset files
+*.parquet
+
+# Experiment artifacts
+*.pt
+*.pth
+*.ckpt
+*.joblib
+*.pkl
+
+# Large recordings
+*.mp4
+
+# Pytest
+.pytest_tmp/
+.pytest_cache/
+
+# Per-user generated predictions; keep compact metrics and manifests in Git
+/experiments/**/runs/**/primary_predictions.csv

@@ -1,0 +1,30 @@
+# NYCU Big Data Analytics — Assignment 2
+# Windows / Linux / macOS (CPU EDA and baseline development)
+# Place this file in your own project's root, alongside notebooks/ and assignment2/.
+#
+# One-time setup:
+#   conda env create -f environment.yaml
+#   conda activate nycu-bda-asg2
+#   python -m ipykernel install --user --name nycu-bda-asg2 --display-name "Python (NYCU BDA A2)"
+#
+# Later changes:
+#   conda env update -f environment.yaml --prune
+#
+# IMPORTANT: Refreshing instructor's data at 21:00 does NOT require recreating
+# this environment. Re-clone the data folder, then restart and run the notebook.
+# Deep learning / GPU packages are intentionally omitted pending model choice.
+name: nycu-bda-asg2
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=1.26,<3
+  - pandas>=2.2,<3
+  - pyarrow>=15,<24
+  - matplotlib>=3.8,<4
+  - jupyterlab>=4,<5
+  - ipykernel>=6,<8
+  - nbformat>=5,<6
+  # Useful when moving from exploratory analysis to temporal baselines and tests:
+  - scikit-learn>=1.4,<2
+  - pytest>=8,<10
