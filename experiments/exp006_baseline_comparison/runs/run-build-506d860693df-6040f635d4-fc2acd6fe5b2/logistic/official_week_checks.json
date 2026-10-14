@@ -1,0 +1,226 @@
+{
+  "calibration/default_0.5": {
+    "all": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-02 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.15007163402298962,
+          "micro_f1": 0.5660119555935098,
+          "score": 0.3580417948082497
+        },
+        {
+          "cutoff_utc": "2026-08-09 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.17499230914402977,
+          "micro_f1": 0.6143295434037177,
+          "score": 0.3946609262738737
+        },
+        {
+          "cutoff_utc": "2026-08-16 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.12654093681847353,
+          "micro_f1": 0.5118845500848896,
+          "score": 0.3192127434516816
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    },
+    "eligible_proxy": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-02 16:00:00+00:00",
+          "users": 8489,
+          "macro_f1": 0.15031341716905952,
+          "micro_f1": 0.5670773442847364,
+          "score": 0.358695380726898
+        },
+        {
+          "cutoff_utc": "2026-08-09 16:00:00+00:00",
+          "users": 8390,
+          "macro_f1": 0.17599082564862323,
+          "micro_f1": 0.6175616835994194,
+          "score": 0.39677625462402133
+        },
+        {
+          "cutoff_utc": "2026-08-16 16:00:00+00:00",
+          "users": 7803,
+          "macro_f1": 0.12740469427652887,
+          "micro_f1": 0.5156183140778776,
+          "score": 0.32151150417720326
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    }
+  },
+  "calibration/tuned_calibration": {
+    "all": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-02 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.2872741850310412,
+          "micro_f1": 0.5722610722610723,
+          "score": 0.4297676286460567
+        },
+        {
+          "cutoff_utc": "2026-08-09 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.3007827047942817,
+          "micro_f1": 0.6280866535373428,
+          "score": 0.46443467916581227
+        },
+        {
+          "cutoff_utc": "2026-08-16 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.2448687444145405,
+          "micro_f1": 0.5007204610951008,
+          "score": 0.3727946027548207
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    },
+    "eligible_proxy": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-02 16:00:00+00:00",
+          "users": 8489,
+          "macro_f1": 0.2876020412579085,
+          "micro_f1": 0.5736819044837155,
+          "score": 0.43064197287081196
+        },
+        {
+          "cutoff_utc": "2026-08-09 16:00:00+00:00",
+          "users": 8390,
+          "macro_f1": 0.3019041308734254,
+          "micro_f1": 0.6306169078446306,
+          "score": 0.466260519359028
+        },
+        {
+          "cutoff_utc": "2026-08-16 16:00:00+00:00",
+          "users": 7803,
+          "macro_f1": 0.24619509615076085,
+          "micro_f1": 0.5052900401313389,
+          "score": 0.3757425681410499
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    }
+  },
+  "primary_validation/default_0.5": {
+    "all": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-30 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.07066735126726896,
+          "micro_f1": 0.150188679245283,
+          "score": 0.11042801525627599
+        },
+        {
+          "cutoff_utc": "2026-09-06 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.15171991160423612,
+          "micro_f1": 0.24032162001191185,
+          "score": 0.19602076580807398
+        },
+        {
+          "cutoff_utc": "2026-09-13 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.2335461341091448,
+          "micro_f1": 0.38466747934443996,
+          "score": 0.30910680672679236
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    },
+    "eligible_proxy": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-30 16:00:00+00:00",
+          "users": 6030,
+          "macro_f1": 0.07142235786371677,
+          "micro_f1": 0.1548663936024966,
+          "score": 0.11314437573310668
+        },
+        {
+          "cutoff_utc": "2026-09-06 16:00:00+00:00",
+          "users": 5656,
+          "macro_f1": 0.15778571028666852,
+          "micro_f1": 0.24949698189134809,
+          "score": 0.2036413460890083
+        },
+        {
+          "cutoff_utc": "2026-09-13 16:00:00+00:00",
+          "users": 5296,
+          "macro_f1": 0.24367440070030225,
+          "micro_f1": 0.40096618357487923,
+          "score": 0.3223202921375907
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    }
+  },
+  "primary_validation/tuned_calibration": {
+    "all": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-30 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.1374557949820671,
+          "micro_f1": 0.2022768520046197,
+          "score": 0.1698663234933434
+        },
+        {
+          "cutoff_utc": "2026-09-06 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.34353337342337104,
+          "micro_f1": 0.40515193197449045,
+          "score": 0.37434265269893074
+        },
+        {
+          "cutoff_utc": "2026-09-13 16:00:00+00:00",
+          "users": 9000,
+          "macro_f1": 0.47067395851418353,
+          "micro_f1": 0.5311176278918215,
+          "score": 0.5008957932030025
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    },
+    "eligible_proxy": {
+      "verified_weeks": 3,
+      "weekly": [
+        {
+          "cutoff_utc": "2026-08-30 16:00:00+00:00",
+          "users": 6030,
+          "macro_f1": 0.14193305701674905,
+          "micro_f1": 0.20885318748931805,
+          "score": 0.17539312225303355
+        },
+        {
+          "cutoff_utc": "2026-09-06 16:00:00+00:00",
+          "users": 5656,
+          "macro_f1": 0.35479617242667033,
+          "micro_f1": 0.41811125485122896,
+          "score": 0.38645371363894965
+        },
+        {
+          "cutoff_utc": "2026-09-13 16:00:00+00:00",
+          "users": 5296,
+          "macro_f1": 0.4847291775378795,
+          "micro_f1": 0.5488456726941886,
+          "score": 0.516787425116034
+        }
+      ],
+      "pooling_rule": "Sum TP/FP/FN across user-weeks, THEN compute F1; not mean of week F1"
+    }
+  }
+}

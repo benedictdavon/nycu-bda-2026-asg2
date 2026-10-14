@@ -1,0 +1,14 @@
+{
+  "thresholds": {
+    "open_pr": 0.5,
+    "open_issue": 0.5,
+    "issue_comment": 0.5,
+    "pr_review": 0.5,
+    "pr_review_comment": 0.5,
+    "push": 0.5
+  },
+  "calibration_details": {
+    "objective": "Fixed rule; thresholds are not tuned",
+    "trace": []
+  }
+}

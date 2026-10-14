@@ -1,0 +1,52 @@
+{
+  "thresholds": {
+    "open_pr": 0.15,
+    "open_issue": 0.1,
+    "issue_comment": 0.125,
+    "pr_review": 0.075,
+    "pr_review_comment": 0.075,
+    "push": 0.45
+  },
+  "calibration_details": {
+    "objective": "0.5 * (pooled macro-F1 + pooled micro-F1)",
+    "calibration_score": 0.4314235639092361,
+    "trace": [
+      {
+        "pass": 1,
+        "combined_f1": 0.4313782147980608,
+        "thresholds": {
+          "open_pr": 0.15,
+          "open_issue": 0.125,
+          "issue_comment": 0.125,
+          "pr_review": 0.075,
+          "pr_review_comment": 0.075,
+          "push": 0.45
+        }
+      },
+      {
+        "pass": 2,
+        "combined_f1": 0.4314235639092361,
+        "thresholds": {
+          "open_pr": 0.15,
+          "open_issue": 0.1,
+          "issue_comment": 0.125,
+          "pr_review": 0.075,
+          "pr_review_comment": 0.075,
+          "push": 0.45
+        }
+      },
+      {
+        "pass": 3,
+        "combined_f1": 0.4314235639092361,
+        "thresholds": {
+          "open_pr": 0.15,
+          "open_issue": 0.1,
+          "issue_comment": 0.125,
+          "pr_review": 0.075,
+          "pr_review_comment": 0.075,
+          "push": 0.45
+        }
+      }
+    ]
+  }
+}

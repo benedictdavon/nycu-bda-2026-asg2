@@ -1,0 +1,89 @@
+{
+  "experiment": "EXP-005",
+  "mode": "build",
+  "created_utc": "2026-10-14T05:16:14.608636+00:00",
+  "source": {
+    "official_sha": "506d860693df60a698b68aa63a8edb4a984c8e1b",
+    "data_directory": "C:\\Users\\Davon\\Desktop\\Master\\Semester 3\\535703 Big Data Analytics\\Assignment 2\\assignment2\\data\\db",
+    "cohort_users": 9000,
+    "latest_observed_utc": "2026-10-13 12:59:29+00:00",
+    "files": {
+      "Users": {
+        "size_bytes": 1263015,
+        "mtime_ns": 1791944509450198100
+      },
+      "Repositories": {
+        "size_bytes": 4328987,
+        "mtime_ns": 1791944509441492000
+      },
+      "PullRequests": {
+        "size_bytes": 26747852,
+        "mtime_ns": 1791944509271899300
+      },
+      "Issues": {
+        "size_bytes": 66403958,
+        "mtime_ns": 1791944509043191700
+      },
+      "IssueComments": {
+        "size_bytes": 18880605,
+        "mtime_ns": 1791944508732039100
+      },
+      "PRReviews": {
+        "size_bytes": 7372305,
+        "mtime_ns": 1791944509170749600
+      },
+      "PRReviewComments": {
+        "size_bytes": 21061682,
+        "mtime_ns": 1791944509138712900
+      },
+      "Pushes": {
+        "size_bytes": 42842001,
+        "mtime_ns": 1791944509423301300
+      }
+    }
+  },
+  "config": {
+    "first_cutoff_taiwan": "2026-03-02",
+    "validation_start_taiwan": "2026-08-03",
+    "holdout_start_taiwan": "2026-10-12",
+    "last_cutoff_taiwan": null,
+    "horizon_days": 7,
+    "label_maturation_days": 7,
+    "purge_boundary_maturity": true,
+    "lookback_days": [
+      7,
+      30,
+      90
+    ],
+    "eligibility_days": 90,
+    "eligibility_min_records": 5
+  },
+  "files": {
+    "train_features.parquet": 189000,
+    "train_labels.parquet": 189000,
+    "validation_features.parquet": 81000,
+    "validation_labels.parquet": 81000,
+    "holdout_features.parquet": 9000,
+    "label_audit.csv": 31
+  },
+  "warnings": [
+    "label_as_of is a configurable reconstruction policy, not certified ingestion completeness",
+    "For direct events (push/comments), seen_utc equals created_at: actual ingestion time is not in the dataset",
+    "Historical cohort membership uses the retrospective fixed 9,000-user cohort",
+    "Eligible proxy (>=5 rows / 90d) may not match the official Oct 28 test roster",
+    "The Sep 27 example truth was used to calibrate labels and is not an independent holdout",
+    "Latest observed row timestamp is not a certified collection-completeness watermark",
+    "Historical holdout labels intentionally NOT constructed or exported"
+  ],
+  "details": {
+    "windows_per_split": {
+      "train": 21,
+      "validation": 9,
+      "holdout": 1
+    },
+    "first_cutoff_utc": "2026-03-01 16:00:00+00:00",
+    "last_cutoff_utc": "2026-10-11 16:00:00+00:00",
+    "holdout_unsealed": false
+  },
+  "not_a_model_score": true
+}
