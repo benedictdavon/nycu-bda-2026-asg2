@@ -1,0 +1,17 @@
+{
+  "calibration_start_taiwan": "2026-08-03",
+  "calibration_end_exclusive_taiwan": "2026-08-24",
+  "report_start_taiwan": "2026-08-31",
+  "report_end_exclusive_taiwan": "2026-09-21",
+  "tuning_population": "eligible_proxy",
+  "threshold_grid": [0.001, 0.002, 0.005, 0.01, 0.015, 0.02, 0.03, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99, 1.0],
+  "threshold_passes": 3,
+  "random_state": 42,
+  "logistic_C": 1.0,
+  "logistic_max_iter": 250,
+  "hgb_max_iter": 80,
+  "hgb_learning_rate": 0.07,
+  "hgb_max_leaf_nodes": 15,
+  "hgb_min_samples_leaf": 75,
+  "hgb_l2_regularization": 3.0
+}
