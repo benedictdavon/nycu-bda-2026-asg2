@@ -1,0 +1,15 @@
+{
+  "candidate_target_fits": 24,
+  "exact_model_replays": 4,
+  "exact_source_report_rebuilds": 4,
+  "feature_cache_origins": 79,
+  "followup_screen_pass": false,
+  "fresh_control_parity_target_fits": 6,
+  "generated_features": 25,
+  "independent_source_user_traces": 5,
+  "official_metric_rows": 25,
+  "prediction_rows": 22919,
+  "report_dir": "C:\\Users\\Davon\\Desktop\\Master\\Semester 3\\535703 Big Data Analytics\\Assignment 2\\reports\\dfs_pca_20261026\\run_fixed_v1",
+  "status": "pass",
+  "training_only_preprocessing_checks": 4
+}

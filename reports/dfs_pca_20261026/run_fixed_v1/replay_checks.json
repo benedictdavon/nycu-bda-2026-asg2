@@ -1,0 +1,26 @@
+[
+  {
+    "both_policies_reconstructed": true,
+    "max_abs_error": 0.0,
+    "origin": "2026-09-09T16:00:00Z",
+    "rows": 6382
+  },
+  {
+    "both_policies_reconstructed": true,
+    "max_abs_error": 0.0,
+    "origin": "2026-09-16T16:00:00Z",
+    "rows": 5862
+  },
+  {
+    "both_policies_reconstructed": true,
+    "max_abs_error": 0.0,
+    "origin": "2026-09-23T16:00:00Z",
+    "rows": 5497
+  },
+  {
+    "both_policies_reconstructed": true,
+    "max_abs_error": 0.0,
+    "origin": "2026-09-30T16:00:00Z",
+    "rows": 5178
+  }
+]

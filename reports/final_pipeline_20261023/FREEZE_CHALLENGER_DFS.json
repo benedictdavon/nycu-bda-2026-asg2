@@ -1,0 +1,79 @@
+{
+  "freeze_stage": "1 of 2: recipe and development evidence (implementation and September parity follow in stage 2, before any October candidate score)",
+  "freeze_created_utc": "2026-10-26T08:16Z",
+  "candidate_id": "augmented_ensemble (dfs_pca_20261026/run_fixed_v1)",
+  "policy_key": "H2DFS_P021",
+  "role": "second challenger; H2/P021 stays the frozen primary (FREEZE.json); H2WPCA_P021 (FREEZE_CHALLENGER_WPCA.json) is the incumbent challenger and comparator",
+  "recipe": {
+    "h2_branch": "unchanged H2 exactly as FREEZE.json",
+    "dfs_features": "25 columns from experiments/dfs_pca_20261026/features.py SynthesizedRepoFeatures(source).build(feature_cutoff(s), population) at every training origin and at the scored cutoff: self-excluded other-actor COUNT (push, issue_comment, pr_review_comment) and NUM_UNIQUE other cohort actors in 7d/30d per repository, stacked MEAN/MAX/population-STD over the user's distinct 30d exposure repositories, plus dfs_exposed_repositories_30d; events with created_at < C and actor/repo first_seen < C",
+    "branch": "inputs = ordered 59 F0 columns followed by the 25 DFS columns (84); Preprocessor(columns, 0.99) (sign-log1p continuous, training-only StandardScaler, PCA 99% full SVD, no whitening; uniform) then fit_weighted_lr(C=1.0) with the H2 row-weight vector",
+    "decision_score": "0.25*rank01(p_H2) + 0.25*rank01(p_DFS) + 0.50*rank01(EW7 tau7d lookback90d); no reranking of the mixture",
+    "k_rule": "P_persist7 positive count per target (unchanged)",
+    "tie_rule": "ascending UserID (unchanged)"
+  },
+  "development_evidence": {
+    "pooled_combined_f1": {
+      "H2_P021": 0.5476344735753119,
+      "H2WPCA_P021": 0.5499040953014345,
+      "H2DFS_P021": 0.550417
+    },
+    "delta_vs_H2WPCA": 0.000513,
+    "weekly_wins_vs_H2WPCA": "3/4",
+    "worst_weekly_delta_vs_H2WPCA": -0.000261,
+    "bootstrap_95_vs_H2WPCA": [
+      -0.000406,
+      0.001422
+    ],
+    "bootstrap_95_vs_H2": [
+      0.000758,
+      0.004806
+    ],
+    "registered_screen": "FAIL (gain +0.000513 below the predeclared +0.001 minimum); frozen for unseen confirmation at the user's request on 2026-10-26",
+    "independently_rescored_2026_10_26": "pooled 0.550417 reproduced by rebuilding the ensemble from saved p_DFS, saved p_H2 and EW7"
+  },
+  "confirmation_plan": {
+    "origins_utc": [
+      "2026-10-07T16:00:00Z",
+      "2026-10-14T16:00:00Z",
+      "2026-10-21T16:00:00Z"
+    ],
+    "reported_quantities": "same as FREEZE_CHALLENGER_WPCA.json, plus H2DFS_P021 minus H2WPCA_P021",
+    "decision_rule": "none frozen; the user decides manually"
+  },
+  "exposure_statement": "No October outcome has been computed for this candidate. The DFS plan (15:31 Taiwan) and preregistration (15:40) were written while H2WPCA_P021's Oct 7 score was being computed in another session (15:39-15:40 Taiwan, 2026-10-26); the DFS run reads no October origin and performed no feature, weight, C or variance search, so its recipe was not selected on any October result.",
+  "file_sha256": {
+    "docs/FEATURE_ENGINEERING.md": "341d34b5ebb0eb68cb70600356288b1763fa6ecaf1ab997ec4f7d5b3284a8a97",
+    "docs/exp/DFS_PCA_PLAN_20261026.md": "13e0faa3c560821f93f6ec79f9daf2e3850494bebf417adb9e1af119d76b6323",
+    "experiments/dfs_pca_20261026/README.md": "57f60b3f77003244c7afa01141032edee00bd064b77620f822dd031f875cf42c",
+    "experiments/dfs_pca_20261026\\__init__.py": "11d45393f8570b8e508804e05415f3a2dfaa77c247c9cc2b1a470d9e8452297b",
+    "experiments/dfs_pca_20261026\\features.py": "5bde4d4228e26c0e264ff065b6e1ecc909704f5e93b22fb2109563fbf3ac84f2",
+    "experiments/dfs_pca_20261026\\run.py": "0b9de870f297f9c01a8040bd25a60254a8101744cffdd7a2c0212d6033868614",
+    "experiments/dfs_pca_20261026\\verify.py": "c00b63c36baad86e58b1559b5e1b1e0f6d89246a089db18d7cd6198838de25b5",
+    "reports/dfs_pca_20261026/run_fixed_v1\\FINDINGS.md": "73d8d7fe2276bb92cfcc1791216e63243145d48007ec51f5646b1b1e4fe2dc66",
+    "reports/dfs_pca_20261026/run_fixed_v1\\bootstrap_vs_H2.csv": "a832c801c10d914febe06ea1ca449152c8b72b9d5db1b28195b31f44b65e552e",
+    "reports/dfs_pca_20261026/run_fixed_v1\\bootstrap_vs_H2.json": "15d36674e65974cf619055870da2f4fed1125347fbd060566431dcdc56700ec2",
+    "reports/dfs_pca_20261026/run_fixed_v1\\bootstrap_vs_existing_ensemble.csv": "4ed99b99d06ea0aee3c0632b1a45015852ef17718915c31dbc9671f90f2c3a85",
+    "reports/dfs_pca_20261026/run_fixed_v1\\bootstrap_vs_existing_ensemble.json": "9416d3e5dee2ca7b0b8c45a94cb71afc098099b00b070c74f13df29420da0870",
+    "reports/dfs_pca_20261026/run_fixed_v1\\comparison.csv": "8c5e1be9cbbdfab4465fd2c7739512d35d8b7486c5cd4a75726d695df665047b",
+    "reports/dfs_pca_20261026/run_fixed_v1\\feature_inventory.json": "88b71e22338864a25df7e31d5b205025ec2f27769ccbdc5072f49912a60637f7",
+    "reports/dfs_pca_20261026/run_fixed_v1\\fit_resources.csv": "0618c3182f0cf54fea8526468db3be7f38cd6c61d02a7c13a38b1e5fa6eb2928",
+    "reports/dfs_pca_20261026/run_fixed_v1\\independent_source_traces.json": "9cb287f4bcb7bc99165454d21b0443987347189d755b7f1ab067cbac773fa599",
+    "reports/dfs_pca_20261026/run_fixed_v1\\metrics.csv": "0184052dad6da0c5ecfe57574180d9868292e7e6c570e1138cb47076945e8b98",
+    "reports/dfs_pca_20261026/run_fixed_v1\\per_target_metrics.csv": "8f9c12852483d297a9ec567e76a2fcb27593fb8cb0c005785a6244e368168906",
+    "reports/dfs_pca_20261026/run_fixed_v1\\preprocessing_checks.json": "d20ffbf58e5a502844f7e1c379c922fa8f2ecd1fd8cd65c71edb9c4dec3f0527",
+    "reports/dfs_pca_20261026/run_fixed_v1\\replay_checks.json": "9d9b292872713fa75ac724c2d46f6c09e446e90706d87b8b24ccaf623864c09a",
+    "reports/dfs_pca_20261026/run_fixed_v1\\report_feature_rebuilds.json": "3b6ac5d506309834ba2de1eff63ddbcecec0b8daab5c0ee424e87e62072ef221",
+    "reports/dfs_pca_20261026/run_fixed_v1\\training_feature_diagnostics.csv": "a7d246892a7c15b0f15060068921009b3d952521c244c42a2536d7ae8e5297c9",
+    "reports/dfs_pca_20261026/run_fixed_v1\\verification.json": "a5eea8c19722f72b641236172eda61476dc9354df7ebdb38c5bfe9472f69f897",
+    "src/relational_features.py": "15433b4fa2bff2dea6a16fa7ad7ec19e12c449a578b51273fa204b3944b8724b",
+    "tests/test_dfs_pca.py": "49b60823fc0b0811442a3c1d322e1beefd7b59b6bdcb93b440c0503065a54cd2"
+  },
+  "output_artifact_sha256": {
+    "outputs/dfs_pca_20261026/run_fixed_v1/predictions.parquet": "ae6e730c78917b7e8b96dc64bd9c3c5b8fa8210c382eaf6c54a058a62c9d0546",
+    "outputs/dfs_pca_20261026/run_fixed_v1/preregistration.json": "5165dfbae66fbdd70e7f8f7a06eb0e9e46dc80c88e9131fa8d4696150e0d5366",
+    "outputs/dfs_pca_20261026/run_fixed_v1/feature_cache_manifest.json": "fb569d0189baa5da65f9f41325974b009c7fe18d1a5319c232c0b190dccf353c",
+    "outputs/dfs_pca_20261026/run_fixed_v1/fit_summaries.json": "9ccda63d2fa1e361904a7880509dff232332f4f76e38368d8e2de209a47bc889",
+    "outputs/dfs_pca_20261026/run_fixed_v1/completion.json": "8b144e4762bf6119ab009ab11a0ec2825fae8d04f9012f59ce3044332feedb4a"
+  }
+}

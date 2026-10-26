@@ -1,0 +1,12 @@
+{
+  "candidate": "augmented_ensemble",
+  "caveat": "Exploratory four inspected weeks, after prior representation/model campaigns; interval ignores temporal and selection uncertainty",
+  "clusters": 6464,
+  "comparator": "existing_ensemble",
+  "delta_95_percentile_interval": [
+    -0.0004064226494739531,
+    0.0014223977379005353
+  ],
+  "draws": 1000,
+  "seed": 42
+}
