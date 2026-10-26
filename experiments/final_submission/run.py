@@ -8,6 +8,8 @@ Run from the project root, for example:
         --population proxy --data-dir <.../assignment2/data/db>
     python -m experiments.final_submission.run --mode submit --origin <S> --roster <csv> \
         --policy h2_p021 --out <csv> --data-dir <.../assignment2/data/db>
+    python -m experiments.final_submission.run --mode score --origin 2026-09-30T16:00:00Z \
+        --population proxy --data-dir <.../assignment2/data/db> --challenger
 """
 import os
 
@@ -49,17 +51,23 @@ from experiments.neural_research_common.data import (
     hgb_weight_vector, iso_utc, origin_population, report_train_origins, sha256_file, sha256_json,
 )
 from experiments.neural_research_common.train_controls import _predict
+from experiments.pca_fisher_20261026.models import Preprocessor
+from experiments.pca_followup_20261026.models import fit_weighted_lr, fixed_rank_scores
 
 REFERENCE_CAMPAIGN = ROOT / "reports" / "neural_refresh_20261022T0033Z"
 REFERENCE_F0_SCHEMA = REFERENCE_CAMPAIGN / "f0_schema.json"
 REFERENCE_SOURCE_MANIFEST = REFERENCE_CAMPAIGN / "source_manifest.json"
 FREEZE_PATH = ROOT / "reports" / "final_pipeline_20261023" / "FREEZE.json"
+CHALLENGER_FREEZE_PATH = ROOT / "reports" / "final_pipeline_20261023" / "FREEZE_CHALLENGER_WPCA.json"
 SEALED_START = utc("2026-10-01T00:00:00Z")
 HORIZON = pd.Timedelta(days=7)
 SCORE_LABEL_LAG = pd.Timedelta(days=12, hours=21)
 LEAKAGE_LOOKBACK = pd.Timedelta(days=104)  # 90-day population window anchored 14 days earlier.
 SCORE_POLICIES = ("H2_P021", "H2_P016", "P_persist7")
-SUBMIT_POLICY_KEYS = {"h2_p021": "H2_P021", "persist7": "P_persist7"}
+CHALLENGER_POLICY = "H2WPCA_P021"
+SUBMIT_POLICY_KEYS = {"h2_p021": "H2_P021", "persist7": "P_persist7", "h2wpca_p021": CHALLENGER_POLICY}
+CHALLENGER_SOURCE_FILES = ("experiments/pca_fisher_20261026/models.py",
+                           "experiments/pca_followup_20261026/models.py")
 EVALUATE_RELPATH = Path("evaluation") / "evaluate.py"
 REUSED_SOURCE_FILES = (
     "src/data_loader.py", "src/decision_policies.py", "src/labels.py", "src/features.py",
@@ -85,6 +93,10 @@ LABEL_RULE = ("training labels: LabelBuilder(s, 7d, label_as_of=A=S-3h); score l
 TRAINING_RULE = ("daily 16:00Z origins s with s >= S-63d and s+7d <= A=S-3h, ascending; "
                  "for on-grid S this equals report_train_origins(S) (56 origins); for off-grid S "
                  "the same permitted-origin rule is applied relative to the given S")
+CHALLENGER_SPEC = ("0.25*rank01(p_H2)+0.25*rank01(p_WPCA)+0.5*rank01(EW7 tau7d lookback90d); p_WPCA = "
+                   "weighted_pca99_c1: sign-log1p, training-only StandardScaler, PCA(0.99) on training rows, "
+                   "six LogisticRegression(C=1.0) with H2 row weights; top-k with k=P_persist7 positive count, "
+                   "ties ascending UserID")
 
 
 def _write_json(path: Path, value) -> None:
@@ -251,6 +263,14 @@ def timed(timings: dict, name: str):
         timings[name] = round(time.perf_counter() - started, 3)
 
 
+def _challenger_frozen() -> bool:
+    try:
+        record = json.loads(CHALLENGER_FREEZE_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return isinstance(record, dict) and "implementation" in record
+
+
 def parse_args(argv=None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="python -m experiments.final_submission.run",
                                      description="Final H2/P021 score or submit pipeline.")
@@ -260,8 +280,9 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--output-root", default="outputs/final_pipeline_20261023")
     parser.add_argument("--population", default="proxy", help="score mode: proxy or file:<csv>")
     parser.add_argument("--truth", help="score mode: official-format truth CSV")
+    parser.add_argument("--challenger", action="store_true", help="score mode: also score H2WPCA_P021")
     parser.add_argument("--roster", help="submit mode: CSV with exactly one UserID column")
-    parser.add_argument("--policy", choices=["h2_p021", "persist7"], help="submit mode")
+    parser.add_argument("--policy", choices=["h2_p021", "persist7", "h2wpca_p021"], help="submit mode")
     parser.add_argument("--out", help="submit mode: output CSV; must not already exist")
     args = parser.parse_args(argv)
     if args.mode == "score":
@@ -272,6 +293,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     else:
         if args.truth or args.population != "proxy":
             parser.error("submit mode does not take --truth or --population")
+        if args.challenger:
+            parser.error("submit mode does not take --challenger; use --policy h2wpca_p021")
         missing = [flag for flag, value in (("--roster", args.roster), ("--policy", args.policy),
                                             ("--out", args.out)) if not value]
         if missing:
@@ -283,6 +306,7 @@ def main(argv=None) -> int:
     wall_started = time.perf_counter()
     args = parse_args(argv)
     mode = args.mode
+    challenger = args.challenger or (mode == "submit" and args.policy == "h2wpca_p021")
     S = utc(args.origin)
     C = feature_cutoff(S, TIMING)
     A = decision_time(S, TIMING)
@@ -290,6 +314,9 @@ def main(argv=None) -> int:
 
     if mode == "score" and S >= SEALED_START and not FREEZE_PATH.exists():
         print("SEALED: October scoring requires FREEZE.json", file=sys.stderr)
+        return 4
+    if challenger and mode == "score" and S >= SEALED_START and not _challenger_frozen():
+        print("SEALED: October challenger scoring requires stage-2 FREEZE_CHALLENGER_WPCA.json", file=sys.stderr)
         return 4
     out_path = None
     if mode == "submit":
@@ -332,6 +359,11 @@ def main(argv=None) -> int:
 
     reused_hashes = {rel: sha256_file(ROOT / rel) for rel in REUSED_SOURCE_FILES}
     reused_hashes["official:evaluation/evaluate.py"] = sha256_file(official_evaluate)
+    challenger_hashes = {rel: sha256_file(ROOT / rel) for rel in CHALLENGER_SOURCE_FILES} if challenger else {}
+    challenger_config = {"challenger": {
+        "policy": CHALLENGER_POLICY, "spec": CHALLENGER_SPEC,
+        "freeze_record": CHALLENGER_FREEZE_PATH.relative_to(ROOT).as_posix(),
+    }} if challenger else {}
     reference_tables = None
     if REFERENCE_SOURCE_MANIFEST.is_file():
         reference_tables = json.loads(REFERENCE_SOURCE_MANIFEST.read_text(encoding="utf-8"))["table_sha256"]
@@ -353,7 +385,8 @@ def main(argv=None) -> int:
                      "pandas": pd.__version__, "sklearn": sklearn.__version__,
                      "joblib": joblib.__version__},
         "env_thread_vars": {name: os.environ.get(name) for name in THREAD_ENV},
-        "sha256": {"run.py": sha256_file(Path(__file__)), **reused_hashes},
+        "sha256": {"run.py": sha256_file(Path(__file__)), **reused_hashes, **challenger_hashes},
+        **challenger_config,
     })
     _write_json(run_dir / "source.json", {
         "snapshot_sha": source.snapshot_sha, "data_dir": str(source.data_dir),
@@ -461,6 +494,15 @@ def main(argv=None) -> int:
                 }
                 print(f"fit {target} {estimator} positives={int(y_j.sum())} "
                       f"seconds={fit_info[target]['fit_seconds']}", flush=True)
+        if challenger:
+            with timed(timings, "fit_challenger"):
+                prep = Preprocessor(f0, 0.99).fit(X)
+                bundle, wpca_summary = fit_weighted_lr("weighted_pca99_c1", 1.0, prep, X, Y, weights, f0)
+                joblib.dump(bundle, models_dir / "wpca99_c1.joblib", compress=3)
+                _write_json(run_dir / "challenger_fit.json",
+                            {"fit": wpca_summary, "preprocessing": prep.summary()})
+            print(f"fit challenger wpca99_c1 dims={wpca_summary['dimensions']} "
+                  f"seconds={timings['fit_challenger']}", flush=True)
         _write_json(run_dir / "training_origins.json", {
             "origins_utc": [iso_utc(s) for s in origins], "origin_count": len(origins),
             "on_grid_S": bool(_on_grid(S)),
@@ -489,6 +531,10 @@ def main(argv=None) -> int:
             ew = ew_scores({t: events[t] for t in TARGET_ORDER}, C, uids, tau_days=7, window_days=90)
             decisions["H2_P021"] = topk_at_persist(blend_score(p, ew, 0.5), persist, uids).astype(np.int8)
             decisions["H2_P016"] = topk_at_persist(p, persist, uids).astype(np.int8)
+            if challenger:
+                p_w = bundle.predict(x_report, columns=f0)
+                _, score_w = fixed_rank_scores({"H2": p, "WPCA": p_w}, ew, {"H2": 0.5, "WPCA": 0.5})
+                decisions[CHALLENGER_POLICY] = topk_at_persist(score_w, persist, uids).astype(np.int8)
 
     truth_mat = None
     truth_frame = None
@@ -516,7 +562,8 @@ def main(argv=None) -> int:
             cli_results = {}
             truth_csv = run_dir / "truth.csv"
             truth_frame.to_csv(truth_csv, index=False)
-            for policy in SCORE_POLICIES:
+            score_policies = (*SCORE_POLICIES, CHALLENGER_POLICY) if challenger else SCORE_POLICIES
+            for policy in score_policies:
                 pred_frame = _decision_frame(uids, decisions[policy])
                 pred_matrix = decisions[policy].astype(np.int8)
                 counts = confusion_arrays(pred_matrix, truth_mat)
@@ -577,10 +624,14 @@ def main(argv=None) -> int:
         if p is not None:
             cols[f"p_H2_{target}"] = p[:, j]
             cols[f"ew7_{target}"] = ew[:, j]
+        if challenger:
+            cols[f"p_WPCA_{target}"] = p_w[:, j]
         cols[f"persist_{target}"] = persist[:, j]
         if p is not None:
             cols[f"dec_H2_P021_{target}"] = decisions["H2_P021"][:, j]
             cols[f"dec_H2_P016_{target}"] = decisions["H2_P016"][:, j]
+        if challenger:
+            cols[f"dec_{CHALLENGER_POLICY}_{target}"] = decisions[CHALLENGER_POLICY][:, j]
         cols[f"dec_P_persist7_{target}"] = decisions["P_persist7"][:, j]
         if truth_mat is not None:
             cols[f"y_{target}"] = truth_mat[:, j]

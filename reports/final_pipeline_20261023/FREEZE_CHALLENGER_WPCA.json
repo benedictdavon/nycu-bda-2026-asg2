@@ -1,5 +1,5 @@
 {
-  "freeze_stage": "1 of 2: recipe and development evidence (implementation and September parity follow in stage 2, before any October candidate score)",
+  "freeze_stage": "2 of 2: recipe (stage 1, commit 43828c9) plus implementation and September parity; October challenger scoring is allowed only after this record is committed",
   "freeze_created_utc": "2026-10-26T07:29Z",
   "candidate_id": "h2_weighted_pca99_c1_a050",
   "policy_key": "H2WPCA_P021",
@@ -74,5 +74,39 @@
     "outputs/pca_followup_20261026/run_fixed_v1/preregistration.json": "3179cfd5ae9b196f26f2f0e8a6eb4523eb382941c4bb797e654935ea821c1cdf",
     "outputs/pca_fisher_20261026/run_fixed_v2/predictions.parquet": "6a2b4d2be2fa25fe8874af5476e39b774c90fb489c17723857656e1974f8323b",
     "outputs/pca_fisher_20261026/run_fixed_v2/preregistration.json": "c43a707b0544a7f07ccd7d9155cd47e030a1091783d7f49b994cfde19d9b6cf9"
+  },
+  "implementation": {
+    "frozen_utc": "2026-10-26T07:39Z",
+    "entrypoint": "python -m experiments.final_submission.run --mode score ... --challenger  (submit: --policy h2wpca_p021)",
+    "code_files": {
+      "experiments/final_submission/run.py": {
+        "sha256_working_file": "69e229781eab95f7d793a8c4edcf9d905d236298c897910f6a6031a5bd84d460",
+        "git_blob": "8d8039e2c8cc12a973932bfd493d0340492b85f1"
+      },
+      "experiments/pca_fisher_20261026/models.py": {
+        "sha256_working_file": "527fd767be5ab9bcdab3027bc9129a8dbc96aac6ad52d67a7ffce7d37bac05dd",
+        "git_blob": "384e6479ce4f743df48b738d77b55ed2ad1f74b0"
+      },
+      "experiments/pca_followup_20261026/models.py": {
+        "sha256_working_file": "bbce75c32fcd858296c87fb226595946114bb27a5a9fda407c3fd5796d907520",
+        "git_blob": "fb85080de5b4bb6ebc09374964485449fc88a182"
+      }
+    },
+    "september_parity_on_2053302b": {
+      "runs": [
+        "outputs/final_pipeline_20261023/score_20260909T1600Z_proxy_20261026T073343Z",
+        "outputs/final_pipeline_20261023/score_20260916T1600Z_proxy_20261026T073501Z",
+        "outputs/final_pipeline_20261023/score_20260923T1600Z_proxy_20261026T073618Z",
+        "outputs/final_pipeline_20261023/score_20260930T1600Z_proxy_20261026T073230Z"
+      ],
+      "result": "PASS: all 4 weeks x 6 targets, max |p_H2 diff| = 0, max |p_WPCA diff| = 0 vs outputs/pca_followup_20261026/run_fixed_v1/weighted_probabilities.parquet (weighted_pca99_c1), 0 mismatched dec_H2_P021 and 0 mismatched H2WPCA_P021 decisions vs the saved h2_weighted_pca99_c1_a050 decisions",
+      "sep30_combined_f1": {
+        "H2_P021": 0.554036,
+        "H2WPCA_P021": 0.559579
+      },
+      "note": "Sep 9/16/23 scores differ slightly from the follow-up report only because run.py labels at S+12d21h while the follow-up used the 2026-10-21T11:59Z cutoff (known 4/8/7 late labels); decisions are identical"
+    },
+    "default_path_unchanged": "Sep 30 run without --challenger (score_20260930T1600Z_proxy_20261026T073759Z): predictions.parquet equal to the R1 run score_20260930T1600Z_proxy_20261023T063746Z; config.json keys identical, no challenger key",
+    "deviation_from_FREEZE_json": "2026-10-26: run.py changed (opt-in challenger only), so FREEZE.json's run.py sha256 185bf9ca... no longer matches the working file. H2/P021, P_persist7, population and label rules are unchanged; R1 stays exact (default-path check above). Logged as a dated deviation per FREEZE.json change_control."
   }
 }
