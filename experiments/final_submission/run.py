@@ -10,6 +10,8 @@ Run from the project root, for example:
         --policy h2_p021 --out <csv> --data-dir <.../assignment2/data/db>
     python -m experiments.final_submission.run --mode score --origin 2026-09-30T16:00:00Z \
         --population proxy --data-dir <.../assignment2/data/db> --challenger
+    python -m experiments.final_submission.run --mode score --origin 2026-10-07T16:00:00Z \
+        --population proxy --data-dir <.../assignment2/data/db> --challenger --challenger-dfs
 """
 import os
 
@@ -53,21 +55,26 @@ from experiments.neural_research_common.data import (
 from experiments.neural_research_common.train_controls import _predict
 from experiments.pca_fisher_20261026.models import Preprocessor
 from experiments.pca_followup_20261026.models import fit_weighted_lr, fixed_rank_scores
+from experiments.dfs_pca_20261026.features import COLUMNS as DFS_COLUMNS, SynthesizedRepoFeatures
 
 REFERENCE_CAMPAIGN = ROOT / "reports" / "neural_refresh_20261022T0033Z"
 REFERENCE_F0_SCHEMA = REFERENCE_CAMPAIGN / "f0_schema.json"
 REFERENCE_SOURCE_MANIFEST = REFERENCE_CAMPAIGN / "source_manifest.json"
 FREEZE_PATH = ROOT / "reports" / "final_pipeline_20261023" / "FREEZE.json"
 CHALLENGER_FREEZE_PATH = ROOT / "reports" / "final_pipeline_20261023" / "FREEZE_CHALLENGER_WPCA.json"
+CHALLENGER_DFS_FREEZE_PATH = ROOT / "reports" / "final_pipeline_20261023" / "FREEZE_CHALLENGER_DFS.json"
 SEALED_START = utc("2026-10-01T00:00:00Z")
 HORIZON = pd.Timedelta(days=7)
 SCORE_LABEL_LAG = pd.Timedelta(days=12, hours=21)
 LEAKAGE_LOOKBACK = pd.Timedelta(days=104)  # 90-day population window anchored 14 days earlier.
 SCORE_POLICIES = ("H2_P021", "H2_P016", "P_persist7")
 CHALLENGER_POLICY = "H2WPCA_P021"
-SUBMIT_POLICY_KEYS = {"h2_p021": "H2_P021", "persist7": "P_persist7", "h2wpca_p021": CHALLENGER_POLICY}
+DFS_POLICY = "H2DFS_P021"
+SUBMIT_POLICY_KEYS = {"h2_p021": "H2_P021", "persist7": "P_persist7", "h2wpca_p021": CHALLENGER_POLICY,
+                      "h2dfs_p021": DFS_POLICY}
 CHALLENGER_SOURCE_FILES = ("experiments/pca_fisher_20261026/models.py",
                            "experiments/pca_followup_20261026/models.py")
+CHALLENGER_DFS_SOURCE_FILES = ("experiments/dfs_pca_20261026/features.py", "src/relational_features.py")
 EVALUATE_RELPATH = Path("evaluation") / "evaluate.py"
 REUSED_SOURCE_FILES = (
     "src/data_loader.py", "src/decision_policies.py", "src/labels.py", "src/features.py",
@@ -97,6 +104,11 @@ CHALLENGER_SPEC = ("0.25*rank01(p_H2)+0.25*rank01(p_WPCA)+0.5*rank01(EW7 tau7d l
                    "weighted_pca99_c1: sign-log1p, training-only StandardScaler, PCA(0.99) on training rows, "
                    "six LogisticRegression(C=1.0) with H2 row weights; top-k with k=P_persist7 positive count, "
                    "ties ascending UserID")
+CHALLENGER_DFS_SPEC = ("0.25*rank01(p_H2)+0.25*rank01(p_DFS)+0.5*rank01(EW7 tau7d lookback90d); p_DFS = "
+                       "augmented_pca99_c1: 59 F0 columns plus 25 SynthesizedRepoFeatures columns at feature_cutoff "
+                       "(self-excluded other-actor repository counts and exposure statistics), sign-log1p, "
+                       "training-only StandardScaler, PCA(0.99) on training rows, six LogisticRegression(C=1.0) "
+                       "with H2 row weights; top-k with k=P_persist7 positive count, ties ascending UserID")
 
 
 def _write_json(path: Path, value) -> None:
@@ -148,6 +160,18 @@ def _check_frame(frame: pd.DataFrame, uids: np.ndarray, f0: list[str], label: st
     if not np.array_equal(frame["UserID"].to_numpy(dtype=np.int64), uids):
         raise RuntimeError(f"{label}: feature UserIDs differ from the requested population")
     assert_feature_schema(frame, f0)
+
+
+def _dfs_frame(builder, cutoff, uids: np.ndarray, label: str, audits: list) -> pd.DataFrame:
+    frame, audit = builder.build(cutoff, uids)
+    if not np.array_equal(frame["UserID"].to_numpy(dtype=np.int64), uids):
+        raise RuntimeError(f"{label}: DFS UserIDs differ from the requested population")
+    if not audit["all_events_and_endpoints_before_cutoff"]:
+        raise AssertionError(f"{label}: DFS features use events or endpoints at or after the cutoff")
+    if not np.isfinite(frame[list(DFS_COLUMNS)].to_numpy(dtype=np.float64)).all():
+        raise RuntimeError(f"{label}: nonfinite DFS features")
+    audits.append({"label": label, "audit": audit})
+    return frame
 
 
 def _read_population_csv(path: Path, source: OfficialData) -> np.ndarray:
@@ -263,9 +287,9 @@ def timed(timings: dict, name: str):
         timings[name] = round(time.perf_counter() - started, 3)
 
 
-def _challenger_frozen() -> bool:
+def _challenger_frozen(path: Path) -> bool:
     try:
-        record = json.loads(CHALLENGER_FREEZE_PATH.read_text(encoding="utf-8"))
+        record = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return False
     return isinstance(record, dict) and "implementation" in record
@@ -281,8 +305,10 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--population", default="proxy", help="score mode: proxy or file:<csv>")
     parser.add_argument("--truth", help="score mode: official-format truth CSV")
     parser.add_argument("--challenger", action="store_true", help="score mode: also score H2WPCA_P021")
+    parser.add_argument("--challenger-dfs", action="store_true", help="score mode: also score H2DFS_P021")
     parser.add_argument("--roster", help="submit mode: CSV with exactly one UserID column")
-    parser.add_argument("--policy", choices=["h2_p021", "persist7", "h2wpca_p021"], help="submit mode")
+    parser.add_argument("--policy", choices=["h2_p021", "persist7", "h2wpca_p021", "h2dfs_p021"],
+                        help="submit mode")
     parser.add_argument("--out", help="submit mode: output CSV; must not already exist")
     args = parser.parse_args(argv)
     if args.mode == "score":
@@ -295,6 +321,8 @@ def parse_args(argv=None) -> argparse.Namespace:
             parser.error("submit mode does not take --truth or --population")
         if args.challenger:
             parser.error("submit mode does not take --challenger; use --policy h2wpca_p021")
+        if args.challenger_dfs:
+            parser.error("submit mode does not take --challenger-dfs; use --policy h2dfs_p021")
         missing = [flag for flag, value in (("--roster", args.roster), ("--policy", args.policy),
                                             ("--out", args.out)) if not value]
         if missing:
@@ -307,6 +335,7 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     mode = args.mode
     challenger = args.challenger or (mode == "submit" and args.policy == "h2wpca_p021")
+    dfs = args.challenger_dfs or (mode == "submit" and args.policy == "h2dfs_p021")
     S = utc(args.origin)
     C = feature_cutoff(S, TIMING)
     A = decision_time(S, TIMING)
@@ -315,8 +344,11 @@ def main(argv=None) -> int:
     if mode == "score" and S >= SEALED_START and not FREEZE_PATH.exists():
         print("SEALED: October scoring requires FREEZE.json", file=sys.stderr)
         return 4
-    if challenger and mode == "score" and S >= SEALED_START and not _challenger_frozen():
+    if challenger and mode == "score" and S >= SEALED_START and not _challenger_frozen(CHALLENGER_FREEZE_PATH):
         print("SEALED: October challenger scoring requires stage-2 FREEZE_CHALLENGER_WPCA.json", file=sys.stderr)
+        return 4
+    if dfs and mode == "score" and S >= SEALED_START and not _challenger_frozen(CHALLENGER_DFS_FREEZE_PATH):
+        print("SEALED: October DFS challenger scoring requires stage-2 FREEZE_CHALLENGER_DFS.json", file=sys.stderr)
         return 4
     out_path = None
     if mode == "submit":
@@ -364,6 +396,11 @@ def main(argv=None) -> int:
         "policy": CHALLENGER_POLICY, "spec": CHALLENGER_SPEC,
         "freeze_record": CHALLENGER_FREEZE_PATH.relative_to(ROOT).as_posix(),
     }} if challenger else {}
+    dfs_hashes = {rel: sha256_file(ROOT / rel) for rel in CHALLENGER_DFS_SOURCE_FILES} if dfs else {}
+    challenger_dfs_config = {"challenger_dfs": {
+        "policy": DFS_POLICY, "spec": CHALLENGER_DFS_SPEC,
+        "freeze_record": CHALLENGER_DFS_FREEZE_PATH.relative_to(ROOT).as_posix(),
+    }} if dfs else {}
     reference_tables = None
     if REFERENCE_SOURCE_MANIFEST.is_file():
         reference_tables = json.loads(REFERENCE_SOURCE_MANIFEST.read_text(encoding="utf-8"))["table_sha256"]
@@ -385,8 +422,8 @@ def main(argv=None) -> int:
                      "pandas": pd.__version__, "sklearn": sklearn.__version__,
                      "joblib": joblib.__version__},
         "env_thread_vars": {name: os.environ.get(name) for name in THREAD_ENV},
-        "sha256": {"run.py": sha256_file(Path(__file__)), **reused_hashes, **challenger_hashes},
-        **challenger_config,
+        "sha256": {"run.py": sha256_file(Path(__file__)), **reused_hashes, **challenger_hashes, **dfs_hashes},
+        **challenger_config, **challenger_dfs_config,
     })
     _write_json(run_dir / "source.json", {
         "snapshot_sha": source.snapshot_sha, "data_dir": str(source.data_dir),
@@ -409,6 +446,7 @@ def main(argv=None) -> int:
 
     f0 = _load_f0_schema()
     builder = construct_feature_builder(source)
+    builder_dfs = SynthesizedRepoFeatures(source) if dfs else None
     feature_items = [("scored", C, uids)]
     origins: list[pd.Timestamp] = []
     x_blocks, y_blocks, row_counts, train_pops, key_rows = [], [], [], [], []
@@ -418,6 +456,7 @@ def main(argv=None) -> int:
         if len(origins) == 0:
             raise RuntimeError("No permitted training origins")
         with timed(timings, "training_inputs"):
+            xd_blocks, dfs_audits = [], []
             for s in origins:
                 pop_s = _ids(origin_population(source, s).to_numpy(dtype=np.int64))
                 pop_index = pd.Index(pop_s, name="UserID")
@@ -436,8 +475,15 @@ def main(argv=None) -> int:
                 train_pops.append(pop_s)
                 key_rows.extend([iso_utc(s), str(int(u))] for u in pop_s)
                 feature_items.append((f"train:{iso_utc(s)}", feature_cutoff(s, TIMING), pop_s))
+                if dfs:
+                    dfs_frame = _dfs_frame(builder_dfs, feature_cutoff(s, TIMING), pop_s, f"train:{iso_utc(s)}",
+                                           dfs_audits)
+                    xd_blocks.append(dfs_frame[list(DFS_COLUMNS)].to_numpy(dtype=np.float64, copy=True))
         X = np.concatenate(x_blocks)
         Y = np.concatenate(y_blocks)
+        if dfs:
+            XD = np.concatenate(xd_blocks)
+            X_aug = np.column_stack([X, XD])
         weights = hgb_weight_vector(S, origins, row_counts)
         training_key_sha256 = sha256_json(key_rows)
         del x_blocks, y_blocks
@@ -503,6 +549,16 @@ def main(argv=None) -> int:
                             {"fit": wpca_summary, "preprocessing": prep.summary()})
             print(f"fit challenger wpca99_c1 dims={wpca_summary['dimensions']} "
                   f"seconds={timings['fit_challenger']}", flush=True)
+        if dfs:
+            with timed(timings, "fit_challenger_dfs"):
+                dfs_cols = [*f0, *DFS_COLUMNS]
+                prep_d = Preprocessor(dfs_cols, 0.99).fit(X_aug)
+                bundle_d, dfs_summary = fit_weighted_lr("augmented_pca99_c1", 1.0, prep_d, X_aug, Y, weights, dfs_cols)
+                joblib.dump(bundle_d, models_dir / "dfs_pca99_c1.joblib", compress=3)
+                _write_json(run_dir / "challenger_dfs_fit.json",
+                            {"fit": dfs_summary, "preprocessing": prep_d.summary()})
+            print(f"fit challenger dfs_pca99_c1 dims={dfs_summary['dimensions']} "
+                  f"seconds={timings['fit_challenger_dfs']}", flush=True)
         _write_json(run_dir / "training_origins.json", {
             "origins_utc": [iso_utc(s) for s in origins], "origin_count": len(origins),
             "on_grid_S": bool(_on_grid(S)),
@@ -535,6 +591,15 @@ def main(argv=None) -> int:
                 p_w = bundle.predict(x_report, columns=f0)
                 _, score_w = fixed_rank_scores({"H2": p, "WPCA": p_w}, ew, {"H2": 0.5, "WPCA": 0.5})
                 decisions[CHALLENGER_POLICY] = topk_at_persist(score_w, persist, uids).astype(np.int8)
+            if dfs:
+                dfs_scored = _dfs_frame(builder_dfs, C, uids, "scored", dfs_audits)
+                x_report_aug = np.column_stack(
+                    [x_report, dfs_scored[list(DFS_COLUMNS)].to_numpy(dtype=np.float64, copy=True)])
+                p_d = bundle_d.predict(x_report_aug, columns=dfs_cols)
+                _, score_d = fixed_rank_scores({"H2": p, "DFS": p_d}, ew, {"H2": 0.5, "DFS": 0.5})
+                decisions[DFS_POLICY] = topk_at_persist(score_d, persist, uids).astype(np.int8)
+                dfs_scored.to_parquet(run_dir / "dfs_features_scored.parquet", index=False)
+                _write_json(run_dir / "dfs_audit.json", {"audits": dfs_audits})
 
     truth_mat = None
     truth_frame = None
@@ -562,7 +627,8 @@ def main(argv=None) -> int:
             cli_results = {}
             truth_csv = run_dir / "truth.csv"
             truth_frame.to_csv(truth_csv, index=False)
-            score_policies = (*SCORE_POLICIES, CHALLENGER_POLICY) if challenger else SCORE_POLICIES
+            score_policies = [*SCORE_POLICIES, *([CHALLENGER_POLICY] if challenger else []),
+                              *([DFS_POLICY] if dfs else [])]
             for policy in score_policies:
                 pred_frame = _decision_frame(uids, decisions[policy])
                 pred_matrix = decisions[policy].astype(np.int8)
@@ -626,12 +692,16 @@ def main(argv=None) -> int:
             cols[f"ew7_{target}"] = ew[:, j]
         if challenger:
             cols[f"p_WPCA_{target}"] = p_w[:, j]
+        if dfs:
+            cols[f"p_DFS_{target}"] = p_d[:, j]
         cols[f"persist_{target}"] = persist[:, j]
         if p is not None:
             cols[f"dec_H2_P021_{target}"] = decisions["H2_P021"][:, j]
             cols[f"dec_H2_P016_{target}"] = decisions["H2_P016"][:, j]
         if challenger:
             cols[f"dec_{CHALLENGER_POLICY}_{target}"] = decisions[CHALLENGER_POLICY][:, j]
+        if dfs:
+            cols[f"dec_{DFS_POLICY}_{target}"] = decisions[DFS_POLICY][:, j]
         cols[f"dec_P_persist7_{target}"] = decisions["P_persist7"][:, j]
         if truth_mat is not None:
             cols[f"y_{target}"] = truth_mat[:, j]

@@ -1,5 +1,5 @@
 {
-  "freeze_stage": "1 of 2: recipe and development evidence (implementation and September parity follow in stage 2, before any October candidate score)",
+  "freeze_stage": "2 of 2: recipe (stage 1, commit 21281b8) plus implementation and September parity; October DFS challenger scoring is allowed only after this record is committed",
   "freeze_created_utc": "2026-10-26T08:16Z",
   "candidate_id": "augmented_ensemble (dfs_pca_20261026/run_fixed_v1)",
   "policy_key": "H2DFS_P021",
@@ -75,5 +75,47 @@
     "outputs/dfs_pca_20261026/run_fixed_v1/feature_cache_manifest.json": "fb569d0189baa5da65f9f41325974b009c7fe18d1a5319c232c0b190dccf353c",
     "outputs/dfs_pca_20261026/run_fixed_v1/fit_summaries.json": "9ccda63d2fa1e361904a7880509dff232332f4f76e38368d8e2de209a47bc889",
     "outputs/dfs_pca_20261026/run_fixed_v1/completion.json": "8b144e4762bf6119ab009ab11a0ec2825fae8d04f9012f59ce3044332feedb4a"
+  },
+  "implementation": {
+    "frozen_utc": "2026-10-26T08:38Z",
+    "entrypoint": "python -m experiments.final_submission.run --mode score ... --challenger-dfs (with --challenger to score both); submit: --policy h2dfs_p021",
+    "code_files": {
+      "experiments/final_submission/run.py": {
+        "sha256_working_file": "c7b9ce9815e2a79c436f06f80274fd955fde85ffab273a6454296671b45984b8",
+        "git_blob": "e1e17c33ba41d89e291ebb140e1fa40beb64dacc"
+      },
+      "experiments/dfs_pca_20261026/features.py": {
+        "sha256_working_file": "5bde4d4228e26c0e264ff065b6e1ecc909704f5e93b22fb2109563fbf3ac84f2",
+        "git_blob": "155ab87e1754e57221b21688f7a3710c9e0a6a06"
+      },
+      "src/relational_features.py": {
+        "sha256_working_file": "15433b4fa2bff2dea6a16fa7ad7ec19e12c449a578b51273fa204b3944b8724b",
+        "git_blob": "22c6ce94f7fcb9b8c99ffea7db850285b1c9ada6"
+      },
+      "experiments/pca_fisher_20261026/models.py": {
+        "sha256_working_file": "527fd767be5ab9bcdab3027bc9129a8dbc96aac6ad52d67a7ffce7d37bac05dd",
+        "git_blob": "384e6479ce4f743df48b738d77b55ed2ad1f74b0"
+      },
+      "experiments/pca_followup_20261026/models.py": {
+        "sha256_working_file": "bbce75c32fcd858296c87fb226595946114bb27a5a9fda407c3fd5796d907520",
+        "git_blob": "fb85080de5b4bb6ebc09374964485449fc88a182"
+      }
+    },
+    "september_parity_on_2053302b": {
+      "runs": [
+        "outputs/final_pipeline_20261023/score_20260909T1600Z_proxy_20261026T082330Z",
+        "outputs/final_pipeline_20261023/score_20260916T1600Z_proxy_20261026T082519Z",
+        "outputs/final_pipeline_20261023/score_20260923T1600Z_proxy_20261026T082708Z",
+        "outputs/final_pipeline_20261023/score_20260930T1600Z_proxy_20261026T082149Z"
+      ],
+      "result": "PASS: all 4 weeks: scored DFS features max |diff| = 0 on 25 columns vs outputs/dfs_pca_20261026/run_fixed_v1/features; max |p_DFS diff| = 0 and 0 mismatched H2DFS_P021 decisions vs saved augmented_ensemble decisions, all 6 targets; H2WPCA_P021 parity also still exact",
+      "sep30_combined_f1": {
+        "H2_P021": 0.554036,
+        "H2WPCA_P021": 0.559579,
+        "H2DFS_P021": 0.56032
+      }
+    },
+    "default_path_unchanged": "Sep 30 run without flags (score_20260930T1600Z_proxy_20261026T083730Z): predictions.parquet equal to R1; no challenger keys in config.json",
+    "deviation_from_FREEZE_json": "run.py changed again (opt-in DFS challenger only); H2/P021 and P_persist7 unchanged, R1 exact. The WPCA stage-2 run.py hash is superseded by this record; WPCA parity re-verified exact with this run.py."
   }
 }
