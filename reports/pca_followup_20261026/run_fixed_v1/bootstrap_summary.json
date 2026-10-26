@@ -1,0 +1,11 @@
+{
+  "caveat": "Exploratory: strongest of 12 new candidates selected after prior campaigns on four inspected weeks; percentile interval ignores model selection and temporal uncertainty",
+  "clusters": 6464,
+  "delta_95_percentile_interval": [
+    0.0002188711230123458,
+    0.004367187301550113
+  ],
+  "draws": 1000,
+  "recipe": "h2_weighted_pca99_c10_a050",
+  "seed": 42
+}

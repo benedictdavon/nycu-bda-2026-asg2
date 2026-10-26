@@ -1,0 +1,12 @@
+{
+  "any_followup_screen_pass": false,
+  "artifact_hashes_verified": 50,
+  "metric_rows_official_parity": 60,
+  "origin_recipe_replays": 20,
+  "report_dir": "C:\\Users\\Davon\\Desktop\\Master\\Semester 3\\535703 Big Data Analytics\\Assignment 2\\reports\\pca_fisher_20261026\\run_fixed_v2",
+  "row_predictions": 114595,
+  "source_tables_verified": 8,
+  "status": "pass",
+  "strongest_recipe": "pca99_lr",
+  "target_classifiers": 120
+}

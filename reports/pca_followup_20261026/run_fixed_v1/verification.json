@@ -1,0 +1,13 @@
+{
+  "any_followup_screen_pass": true,
+  "candidate_count": 12,
+  "exact_candidate_policy_reconstruction": true,
+  "model_replays": 12,
+  "new_target_fits": 72,
+  "official_metric_rows": 80,
+  "parent_preprocessing_exact": true,
+  "prediction_rows": 275028,
+  "report_dir": "C:\\Users\\Davon\\Desktop\\Master\\Semester 3\\535703 Big Data Analytics\\Assignment 2\\reports\\pca_followup_20261026\\run_fixed_v1",
+  "status": "pass",
+  "strongest_recipe": "h2_weighted_pca99_c10_a050"
+}

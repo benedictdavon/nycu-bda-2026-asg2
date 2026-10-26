@@ -1,0 +1,11 @@
+{
+  "caveat": "Exploratory tied-best candidate; same four inspected weeks and 12-candidate family; interval ignores model selection and temporal uncertainty",
+  "clusters": 6464,
+  "delta_95_percentile_interval": [
+    0.00020139584162149615,
+    0.004348689568109865
+  ],
+  "draws": 1000,
+  "recipe": "h2_weighted_pca99_c1_a050",
+  "seed": 42
+}

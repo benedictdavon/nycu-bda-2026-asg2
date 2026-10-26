@@ -1,0 +1,11 @@
+{
+  "caveat": "Exploratory, selected strongest of five recipes; September inspected previously; only four weeks",
+  "clusters": 6464,
+  "delta_95_percentile_interval": [
+    -0.00411217034440702,
+    0.0018983288801829507
+  ],
+  "draws": 1000,
+  "recipe": "pca99_lr",
+  "seed": 42
+}
