@@ -1,0 +1,63 @@
+# NYCU Big Data Analytics — Assignment 2
+# EXP-015 relational GNN (RDL) pilot: exact pins from `pip freeze` of env `asg2-rdl`
+# (Python 3.11.17, Windows 11, NVIDIA RTX 3070 Ti Laptop 8 GB, driver 581.15).
+# Verified by smoke test experiments/exp015_rdl_pilot/env_smoke.py (checks a-f).
+#
+# Install (invoke the env's python by full path; -s ignores the per-user site-packages):
+#   C:\Users\Davon\miniconda3\envs\asg2-rdl\python.exe -s -m pip install -r configs/environments/requirements-exp015.txt
+#
+# Index sources used by the pins below:
+#   torch==2.5.1+cu124      : https://download.pytorch.org/whl/cu124
+#   pyg-lib / torch_scatter / torch_sparse (+pt25cu124): https://data.pyg.org/whl/torch-2.5.0+cu124.html
+#   everything else         : PyPI
+# Not installed on purpose: torchvision, torchaudio, Jupyter.
+--extra-index-url https://download.pytorch.org/whl/cu124
+-f https://data.pyg.org/whl/torch-2.5.0+cu124.html
+
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.5
+aiosignal==1.4.0
+attrs==26.1.0
+certifi==2026.7.22
+charset-normalizer==3.5.2
+cloudpickle==3.1.2
+colorama==0.4.6
+filelock==3.32.3
+frozenlist==1.8.0
+fsspec==2026.9.0
+idna==3.20
+iniconfig==2.3.1
+Jinja2==3.1.6
+joblib==1.6.0
+MarkupSafe==3.0.3
+mpmath==1.3.0
+multidict==7.1.0
+networkx==3.6.1
+numpy==2.2.5
+packaging==26.3
+pandas==2.3.3
+pluggy==1.7.0
+propcache==0.5.4
+psutil==7.2.2
+pyarrow==22.0.0
+pyg-lib==0.4.0+pt25cu124
+Pygments==2.21.0
+pyparsing==3.3.3
+pytest==9.1.1
+python-dateutil==2.9.0.post0
+pytz==2026.5
+requests==2.34.2
+scikit-learn==1.8.0
+scipy==1.17.1
+six==1.17.0
+sympy==1.13.1
+threadpoolctl==3.7.0
+torch==2.5.1+cu124
+torch-geometric==2.6.1
+torch_scatter==2.1.2+pt25cu124
+torch_sparse==0.6.18+pt25cu124
+tqdm==4.70.1
+typing_extensions==4.16.0
+tzdata==2026.5
+urllib3==2.8.0
+yarl==1.25.1

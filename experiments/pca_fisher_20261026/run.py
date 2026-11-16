@@ -40,7 +40,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA_RUN = ROOT / "outputs" / CAMPAIGN_ID
-SOURCE_DB = (ROOT / "assignment2_backup" / f"{SOURCE_SHA}_20261023"
+SOURCE_DB = (ROOT / "data/legacy/snapshots" / f"{SOURCE_SHA}_20261023"
              / "assignment2_moved_aside" / "data" / "db")
 PLAN = ROOT / "docs/exp/PCA_FISHER_PLAN_20261026.md"
 EXPECTED_H2 = 0.5476344735753119

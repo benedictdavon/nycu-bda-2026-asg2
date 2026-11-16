@@ -64,10 +64,10 @@ def locate_data_dir(project_root: Optional[str | Path] = None,
         bases.extend([Path(data_dir), Path(data_dir) / "db", Path(data_dir) / "data/db"])
     if project_root:
         p = Path(project_root)
-        bases.extend([p / "assignment2/data/db", p / "data/db"])
+        bases.extend([p / "data/legacy/assignment2/data/db", p / "assignment2/data/db", p / "data/db"])
     if not bases:
         for p in (Path.cwd(), *Path.cwd().parents):
-            bases.append(p / "assignment2/data/db")
+            bases.extend([p / "data/legacy/assignment2/data/db", p / "assignment2/data/db"])
     for base in bases:
         base = base.expanduser().resolve()
         if all((base / f"{t}.parquet").is_file() for t in TABLES):

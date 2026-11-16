@@ -56,8 +56,8 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-final.txt
 
-git clone https://github.com/nycubigdata-2026fall/BigData2026-Assignment2.git course_assignment2
-git -C course_assignment2 rev-parse HEAD
+git clone https://github.com/nycubigdata-2026fall/BigData2026-Assignment2.git data/course
+git -C data/course rev-parse HEAD
 ```
 
 On Linux/macOS, activate with `source .venv/bin/activate`. `environment.yaml` remains available for notebook/EDA work; `requirements-final.txt` pins the runtime used for the final pipeline. Preserve the course commit SHA printed above alongside the exact raw-hour list and output manifests.
@@ -69,14 +69,14 @@ Download the UTC hours needed for the selected training/inference period from GH
 For example, in Bash, download May through October and November 1–20, then the first twelve November 21 hours:
 
 ```bash
-mkdir -p raw_data
+mkdir -p data/raw
 for month in 05 06 07 08 09 10; do
   for day in $(seq -w 1 31); do
-    wget -nc -P raw_data https://data.gharchive.org/2026-${month}-${day}-{0..23}.json.gz
+    wget -nc -P data/raw https://data.gharchive.org/2026-${month}-${day}-{0..23}.json.gz
   done
 done
-wget -nc -P raw_data https://data.gharchive.org/2026-11-{01..20}-{0..23}.json.gz
-wget -nc -P raw_data https://data.gharchive.org/2026-11-21-{0..11}.json.gz
+wget -nc -P data/raw https://data.gharchive.org/2026-11-{01..20}-{0..23}.json.gz
+wget -nc -P data/raw https://data.gharchive.org/2026-11-21-{0..11}.json.gz
 ```
 
 Invalid calendar dates and unavailable archive hours return HTTP errors. Record missing hours; an absent event type is not proof that users were inactive. These are large public archives. The November 21 files become available only after their corresponding hours have finished; do not treat this future-data command as executable in full before then.
@@ -84,7 +84,7 @@ Invalid calendar dates and unavailable archive hours return HTTP errors. Record 
 Run the instructor's preprocessor on the downloaded hours:
 
 ```powershell
-python course_assignment2/scripts/preprocess.py --raw raw_data --out data/final_20261121
+python data/course/scripts/preprocess.py --raw data/raw --out data/final_20261121
 ```
 
 This creates `data/final_20261121/db/` with `Users`, `Repositories`, `PullRequests`, `Issues`, `IssueComments`, `PRReviews`, `PRReviewComments` and `Pushes` Parquet files. Use a fresh output directory for a changed input archive. Do not edit the generated tables.
@@ -94,9 +94,9 @@ This creates `data/final_20261121/db/` with `Users`, `Repositories`, `PullReques
 The following command builds historical features and labels, fits the models, predicts the official roster and runs the instructor's format validator. It does not require an old experiment's fitted models or cached predictions.
 
 ```powershell
-python -m experiments.final_submission.run --mode submit --origin 2026-11-21T16:00:00Z --official-repo course_assignment2 --data-dir data/final_20261121/db --roster course_assignment2/submission/test_input.csv --policy h2_p021 --out delivery/output_314561002.csv --output-root outputs/final_delivery
+python -m experiments.final_submission.run --mode submit --origin 2026-11-21T16:00:00Z --official-repo data/course --data-dir data/final_20261121/db --roster data/course/submission/test_input.csv --policy h2_p021 --out delivery/output_314561002.csv --output-root outputs/final_delivery
 
-python course_assignment2/scripts/evaluate.py --pred delivery/output_314561002.csv --input course_assignment2/submission/test_input.csv
+python data/course/scripts/evaluate.py --pred delivery/output_314561002.csv --input data/course/submission/test_input.csv
 ```
 
 The output must have exactly one row for every official user, with this header and only binary target values:
@@ -110,7 +110,7 @@ The command refuses to overwrite an existing CSV. Each run records the input tab
 For the complete delivery check in one command, run:
 
 ```powershell
-python scripts/reproduce_submission.py --official-repo course_assignment2 --raw raw_data --output-dir delivery/final_20261121 --student-id 314561002
+python scripts/reproduce_submission.py --official-repo data/course --raw data/raw --output-dir delivery/final_20261121 --student-id 314561002
 ```
 
 This rebuilds the eight tables with the official preprocessor, fits H2/P021 twice independently, checks both CSVs with the official evaluator, requires identical CSV hashes, and writes `delivery/final_20261121/output_314561002.csv` plus `reproduction.json` and logs. The manifest inventories every raw-hour filename and SHA-256. Final mode refuses to run before the November 21 feature cutoff or with raw hours after that cutoff. Never replace this checked archive with a newer download when reproducing an already submitted CSV.
@@ -164,5 +164,10 @@ Cover Q1 (eight-table schema, all foreign keys/primary keys and the actual datas
 - `experiments/pca_fisher_20261026/`, `pca_followup_20261026/`, `dfs_pca_20261026/`: optional frozen model branches.
 - `tests/`: regression and temporal-safety checks.
 - `reports/`: compact experiment evidence and frozen recipes.
-- `notebooks/`: historical EDA.
-- `outputs/`, `data/`, `raw_data/`, `delivery/`: generated local artifacts.
+- `notebooks/`: historical EDA; see its README before rerunning archived notebooks.
+- `data/course/`: revised instructor code and roster; `data/research/`: retained GH Archive staging work; `data/legacy/`: historical datasets.
+- `docs/assignment/`: assignment PDFs and slide template; `configs/environments/`: optional experiment dependencies.
+- `reports/presentation/`: schema/entity figures and their generator.
+- `outputs/`: generated experiment outputs and logs; `delivery/`: verified submission/rehearsal packages.
+
+Historical result manifests retain their recorded paths and hashes. `src.paths.resolve_run_path` translates known former workspace paths when loading archived artifacts.

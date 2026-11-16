@@ -1,0 +1,5 @@
+# Install locally without changing the Conda environment:
+# python -m pip install --target .deps-exp011 --no-deps -r configs/environments/requirements-exp011.txt
+# Existing Conda runtime supplies NumPy, pandas, SciPy, scikit-learn and PyArrow.
+-r ../exp011_optional_requirements.txt
+xgboost==1.7.6

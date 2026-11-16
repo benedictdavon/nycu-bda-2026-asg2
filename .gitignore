@@ -53,3 +53,7 @@ __pycache__/
 /*.log
 /*.zip
 /[[]Revision] Big Data Course - Assignment 2.pdf
+
+# Local course handouts/templates (kept under docs after workspace cleanup)
+/docs/assignment/*.pdf
+/docs/assignment/*.pptx

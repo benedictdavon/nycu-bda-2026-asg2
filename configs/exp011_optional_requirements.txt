@@ -1,0 +1,8 @@
+# Optional EXP-011 learner packages; install only into the project-local target.
+# The selected Conda environment already supplies NumPy, pandas, SciPy,
+# scikit-learn, matplotlib, six, and packaging.
+lightgbm==4.7.0
+catboost==1.2.10
+graphviz==0.21
+plotly==7.1.0
+narwhals==2.27.1

@@ -28,6 +28,19 @@ def test_existing_paths_and_unrelated_paths_are_preserved(tmp_path):
     assert resolve_run_path(unrelated) == unrelated
 
 
+def test_recorded_local_paths_resolve_after_workspace_cleanup(tmp_path, monkeypatch):
+    from src import paths
+
+    monkeypatch.setattr(paths, "PROJECT_ROOT", tmp_path)
+    assert paths.resolve_run_path(tmp_path / "assignment2/data/db") == tmp_path / "data/legacy/assignment2/data/db"
+    assert paths.resolve_run_path(tmp_path / "assignment2_backup/snapshot") == tmp_path / "data/legacy/snapshots/snapshot"
+    assert paths.resolve_run_path(tmp_path / "assignment2_new/revision_smoke/assignment2/scripts/evaluate.py") == tmp_path / "data/course/scripts/evaluate.py"
+    assert paths.resolve_run_path(tmp_path / "requirements-exp011.txt") == tmp_path / "configs/environments/requirements-exp011.txt"
+    old = tmp_path / "assignment2"
+    old.mkdir()
+    assert paths.resolve_run_path(old) == old
+
+
 def test_pre_rename_model_bundle_can_be_loaded(tmp_path, monkeypatch):
     from src import baseline_models
 
