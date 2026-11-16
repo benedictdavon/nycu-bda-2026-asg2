@@ -10,9 +10,9 @@
 # Later changes:
 #   conda env update -f environment.yaml --prune
 #
-# IMPORTANT: Refreshing instructor's data at 21:00 does NOT require recreating
-# this environment. Re-clone the data folder, then restart and run the notebook.
-# Deep learning / GPU packages are intentionally omitted pending model choice.
+# Revised task: rebuild tables from GH Archive with the course preprocessor.
+# New data does not require recreating this environment. For the verified final
+# CPU runtime, use requirements-final.txt; neural experiments are optional.
 name: nycu-bda-asg2
 channels:
   - conda-forge

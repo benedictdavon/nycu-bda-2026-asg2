@@ -1,0 +1,9 @@
+# Verified CPU submission runtime (Python 3.11).
+numpy==2.4.6
+pandas==2.3.3
+pyarrow==23.0.1
+scipy==1.17.1
+scikit-learn==1.9.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+pytest==9.1.1

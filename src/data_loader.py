@@ -73,8 +73,8 @@ def locate_data_dir(project_root: Optional[str | Path] = None,
         if all((base / f"{t}.parquet").is_file() for t in TABLES):
             return base
     raise FileNotFoundError(
-        "Could not find all eight instructor Parquet files. Clone the official repository "
-        "into assignment2/, or specify --data-dir PATH (the directory with *.parquet)."
+        "Could not find all eight official Parquet files. Run the course scripts/preprocess.py "
+        "on GH Archive hours, then specify --data-dir PATH (the generated db directory)."
     )
 
 
@@ -90,9 +90,11 @@ def repo_commit(repo: Path) -> str | None:
 
 
 def load_official_evaluator(repo: Path):
-    path = repo / "evaluation" / "evaluate.py"
+    path = repo / "scripts" / "evaluate.py"
     if not path.is_file():
-        raise FileNotFoundError(f"Official evaluator not found at {path}")
+        path = repo / "evaluation" / "evaluate.py"
+    if not path.is_file():
+        raise FileNotFoundError(f"Official evaluator not found in scripts/ or evaluation/ under {repo}")
     spec = importlib.util.spec_from_file_location("asg2_official_evaluate", path)
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
@@ -105,9 +107,12 @@ def load_official_evaluator(repo: Path):
 class OfficialData:
     """Lazy per-table reader. Target-event frames contain only cohort-associated actors."""
 
-    def __init__(self, data_dir: str | Path, *, expected_cohort: int | None = 9000):
+    def __init__(self, data_dir: str | Path, *, expected_cohort: int | None = 9000,
+                 official_repo: str | Path | None = None):
         self.data_dir = Path(data_dir).resolve()
-        self.official_repo = self.data_dir.parent.parent
+        self.official_repo = (
+            Path(official_repo).resolve() if official_repo is not None else self.data_dir.parent.parent
+        )
         self.snapshot_sha = repo_commit(self.official_repo)
         self._events: dict[str, pd.DataFrame] = {}
         self._max_row_seen: pd.Timestamp | None = None
@@ -184,9 +189,12 @@ class OfficialData:
         }
 
     def official_test_user_ids(self, path: str | Path | None = None) -> pd.Index:
-        path = Path(path) if path is not None else self.official_repo / "evaluation/test_input.csv"
+        if path is None:
+            revised = self.official_repo / "submission/test_input.csv"
+            path = revised if revised.is_file() else self.official_repo / "evaluation/test_input.csv"
+        path = Path(path)
         if not path.is_file():
-            raise FileNotFoundError(f"User ID list not found (official test users arrive Oct 28): {path}")
+            raise FileNotFoundError(f"Official test user list not found: {path}")
         frame = pd.read_csv(path)
         if list(frame.columns) != ["UserID"]:
             raise ValueError("Test user CSV must have exactly one column, UserID")
@@ -195,5 +203,6 @@ class OfficialData:
         ids = pd.Index(frame.UserID.astype("int64"), name="UserID")
         unknown = ids.difference(self.cohort_ids)
         if len(unknown):
-            raise ValueError(f"{len(unknown)} test users are not in instructor cohort")
+            raise ValueError(f"{len(unknown)} test users are missing from the loaded cohort. "
+                             "Check the data coverage and use the matching test roster.")
         return ids

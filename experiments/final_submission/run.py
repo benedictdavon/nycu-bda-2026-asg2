@@ -6,8 +6,9 @@ roster-format decision CSV and checks it with the official format validator.
 Run from the project root, for example:
     python -m experiments.final_submission.run --mode score --origin 2026-09-30T16:00:00Z \
         --population proxy --data-dir <.../assignment2/data/db>
-    python -m experiments.final_submission.run --mode submit --origin <S> --roster <csv> \
-        --policy h2_p021 --out <csv> --data-dir <.../assignment2/data/db>
+    python -m experiments.final_submission.run --mode submit --origin 2026-11-21T16:00:00Z \
+        --official-repo <revised-course-checkout> --data-dir <preprocessor-output/db> \
+        --roster <revised-course-checkout/submission/test_input.csv> --policy h2_p021 --out <csv>
     python -m experiments.final_submission.run --mode score --origin 2026-09-30T16:00:00Z \
         --population proxy --data-dir <.../assignment2/data/db> --challenger
     python -m experiments.final_submission.run --mode score --origin 2026-10-07T16:00:00Z \
@@ -75,7 +76,6 @@ SUBMIT_POLICY_KEYS = {"h2_p021": "H2_P021", "persist7": "P_persist7", "h2wpca_p0
 CHALLENGER_SOURCE_FILES = ("experiments/pca_fisher_20261026/models.py",
                            "experiments/pca_followup_20261026/models.py")
 CHALLENGER_DFS_SOURCE_FILES = ("experiments/dfs_pca_20261026/features.py", "src/relational_features.py")
-EVALUATE_RELPATH = Path("evaluation") / "evaluate.py"
 REUSED_SOURCE_FILES = (
     "src/data_loader.py", "src/decision_policies.py", "src/labels.py", "src/features.py",
     "src/baseline_models.py", "src/metrics.py", "src/phase_b_rules.py",
@@ -301,6 +301,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--mode", required=True, choices=["score", "submit"])
     parser.add_argument("--origin", required=True, help="Origin S, ISO UTC, e.g. 2026-09-30T16:00:00Z")
     parser.add_argument("--data-dir", required=True, help="Directory holding the eight *.parquet tables")
+    parser.add_argument("--official-repo", type=Path,
+                        help="Course checkout containing the evaluator (defaults to the legacy data layout)")
     parser.add_argument("--output-root", default="outputs/final_pipeline_20261023")
     parser.add_argument("--population", default="proxy", help="score mode: proxy or file:<csv>")
     parser.add_argument("--truth", help="score mode: official-format truth CSV")
@@ -359,15 +361,21 @@ def main(argv=None) -> int:
     truth_path = Path(args.truth).resolve() if args.truth else None
     needs_model = not (mode == "submit" and args.policy == "persist7")
 
+    data_dir = Path(args.data_dir).resolve()
+    official_repo = args.official_repo.resolve() if args.official_repo else data_dir.parent.parent
+    evaluator = load_official_evaluator(official_repo)
+    official_evaluate = Path(evaluator.__file__)
+    evaluate_relpath = official_evaluate.relative_to(official_repo)
+    revised_layout = evaluate_relpath.parts[0] == "scripts"
+
     timings: dict[str, float] = {}
     with timed(timings, "load_source"):
-        source = OfficialData(args.data_dir, expected_cohort=9000)
+        # Revised tables include cohort members observed in the downloaded hours.
+        source = OfficialData(data_dir, official_repo=official_repo,
+                              expected_cohort=None if revised_layout else 9000)
         events = {target: source.events(target) for target in TARGET_ORDER}
         latest_observed = source.latest_observed()
         table_sha256 = {table: sha256_file(source.data_dir / f"{table}.parquet") for table in TABLES}
-    evaluator = load_official_evaluator(source.official_repo)
-    official_evaluate = source.official_repo / EVALUATE_RELPATH
-
     with timed(timings, "population"):
         if mode == "submit":
             roster_path = Path(args.roster).resolve()
@@ -390,7 +398,7 @@ def main(argv=None) -> int:
     print(f"RUN_DIR {run_dir}", flush=True)
 
     reused_hashes = {rel: sha256_file(ROOT / rel) for rel in REUSED_SOURCE_FILES}
-    reused_hashes["official:evaluation/evaluate.py"] = sha256_file(official_evaluate)
+    reused_hashes[f"official:{evaluate_relpath.as_posix()}"] = sha256_file(official_evaluate)
     challenger_hashes = {rel: sha256_file(ROOT / rel) for rel in CHALLENGER_SOURCE_FILES} if challenger else {}
     challenger_config = {"challenger": {
         "policy": CHALLENGER_POLICY, "spec": CHALLENGER_SPEC,
@@ -426,7 +434,8 @@ def main(argv=None) -> int:
         **challenger_config, **challenger_dfs_config,
     })
     _write_json(run_dir / "source.json", {
-        "snapshot_sha": source.snapshot_sha, "data_dir": str(source.data_dir),
+        "snapshot_sha": None if revised_layout else source.snapshot_sha, "data_dir": str(source.data_dir),
+        "course_repo_sha": source.snapshot_sha,
         "official_repo": str(source.official_repo), "table_sha256": table_sha256,
         "matches_reference_campaign_manifest": (None if reference_tables is None else
                                                table_sha256 == reference_tables),

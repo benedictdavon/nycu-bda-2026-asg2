@@ -34,3 +34,22 @@ __pycache__/
 
 # Per-user generated predictions; keep compact metrics and manifests in Git
 /experiments/**/runs/**/primary_predictions.csv
+
+# EXP-007 recovered per-user score tables stay local
+/experiments/exp007_baseline_diagnostics/runs/**/*_probabilities.*
+
+# EXP-011 optional learner wheels are installed locally, never into the shared Conda environment
+/.deps-exp011/
+
+# Generated data, delivery packages and local verification checkouts
+/course_assignment2/
+/raw_data/
+/data/
+/delivery/
+/outputs/
+/.delivery-verification/
+/.claude/
+/.pytest*/
+/*.log
+/*.zip
+/[[]Revision] Big Data Course - Assignment 2.pdf
