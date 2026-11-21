@@ -143,7 +143,7 @@ Get-FileHash delivery/repeated/output_314561002.csv -Algorithm SHA256
 
 The latest revised-data replay covers **13,711 user-weeks** across three mature October windows and the three activities with consistent archive coverage (`open_pr`, `open_issue`, `pr_review`). Combined F1 is **0.415506** for H2/P021, **0.416745** for the PCA/LR variant and **0.358904** for persistence. The RBF SVM addition has no convincing advantage. These are historical proxy-population results, not an official November score or a six-target guarantee.
 
-See the [November 8 summary](reports/svm_variants_20261026/newer_20261108/SUMMARY.md), [pooled metrics](reports/svm_variants_20261026/newer_20261108/mature_common_target_metrics.csv), and [coverage audit](reports/svm_variants_20261026/newer_20261108/hours_missing_by_activity.csv). Earlier experiment results and protocols remain in the [experiment log](docs/EXPERIMENT_LOG.md); their old dates, data-release instructions and grading information are archival.
+See the [November 8 summary](reports/svm_variants_20261026/newer_20261108/SUMMARY.md), [pooled metrics](reports/svm_variants_20261026/newer_20261108/mature_common_target_metrics.csv), and [coverage audit](reports/svm_variants_20261026/newer_20261108/hours_missing_by_activity.csv).
 
 ## Delivery
 
@@ -166,7 +166,7 @@ Cover Q1 (eight-table schema, all foreign keys/primary keys and the actual datas
 - `reports/`: compact experiment evidence and frozen recipes.
 - `notebooks/`: historical EDA; see its README before rerunning archived notebooks.
 - `data/course/`: revised instructor code and roster; `data/research/`: retained GH Archive staging work; `data/legacy/`: historical datasets.
-- `docs/assignment/`: assignment PDFs and slide template; `configs/environments/`: optional experiment dependencies.
+- `configs/environments/`: optional experiment dependencies.
 - `reports/presentation/`: schema/entity figures and their generator.
 - `outputs/`: generated experiment outputs and logs; `delivery/`: verified submission/rehearsal packages.
 
