@@ -1,8 +1,8 @@
-# Optional experiment environments
+# Experiment environments
 
-The verified final CPU pipeline uses `requirements-final.txt` at the project root.
+The final pipeline only needs `requirements-final.txt` in the project root.
 
-- `requirements-exp011.txt`: optional LightGBM/CatBoost/XGBoost experiment packages. From the project root: `python -m pip install --target .deps-exp011 --no-deps -r configs/environments/requirements-exp011.txt`. Its included requirements file is resolved relative to this folder.
-- `requirements-exp015.txt`: archived relational GNN environment pins, including CUDA-specific wheels. Use its dedicated environment and documented indexes; these packages are not required for final H2/P021 inference.
+- `requirements-exp011.txt`: LightGBM, CatBoost and XGBoost for the boosted-tree comparison. Install from the project root with `python -m pip install --target .deps-exp011 --no-deps -r configs/environments/requirements-exp011.txt`.
+- `requirements-exp015.txt`: the GNN experiment, with CUDA wheels. It needs its own environment.
 
-`environment.yaml` at the root remains the general notebook/EDA environment.
+`environment.yaml` in the root is the environment for the notebooks.
