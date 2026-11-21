@@ -65,7 +65,6 @@
   ],
   "continuous_semantics": "signed log1p then fit-only standardization; clipping [-8,8]",
   "f0_width": 59,
-  "feature_builder_code_sha256": "8a93c5ecae9f1ed180f18a6b676413f6c1e7418b990379bc8178b959cd11f6bf",
   "feature_builder_config": {
     "eligibility_days": 90,
     "eligibility_min_rows": 5,
@@ -136,6 +135,5 @@
     "historical_observation_count_90d_proxy",
     "eligible_proxy",
     "activity_types_prior_7d"
-  ],
-  "source_sha": "2053302ba75751be975b9e779f567557b66f4071"
+  ]
 }

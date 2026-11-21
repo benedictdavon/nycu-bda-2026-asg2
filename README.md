@@ -91,7 +91,7 @@ To do everything in one step (preprocess, train twice, check that both CSVs are 
 python scripts/reproduce_submission.py --official-repo data/course --raw data/raw --output-dir delivery/final_20261121 --student-id 314561002
 ```
 
-The result is `delivery/final_20261121/output_314561002.csv`, with `reproduction.json` listing every raw file's SHA-256.
+The result is `delivery/final_20261121/output_314561002.csv`.
 
 ## Tests
 
@@ -119,6 +119,6 @@ In weekly backtests from Sep 27 to Nov 15, H2/P021 scored 0.047 to 0.065 combine
 - `experiments/pca_fisher_20261026/`, `pca_followup_20261026/`, `dfs_pca_20261026/`: the tested variants
 - `scripts/reproduce_submission.py`: one-step rebuild and check
 - `tests/`: tests
-- `reports/`: experiment results and the frozen model settings
+- `reports/`: experiment results
 - `reports/presentation/`: schema graph figures and the script that draws them
 - `notebooks/`: early data exploration on the first version of the dataset

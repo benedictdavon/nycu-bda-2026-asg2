@@ -1,1 +1,1 @@
-"""Shared, source-authenticated inputs for the Luna Max neural research campaign."""
+"""Shared population, data and model settings for the research experiments."""
