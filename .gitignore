@@ -3,10 +3,8 @@
 /assignment2_backup/
 /assignment2_new/
 
-# Local instructor reference and agent handoff notes
+# Local instructor reference
 /Big Data Course - Assignment 2.pdf
-/docs/agent/
-/docs/ai/
 
 # Python
 __pycache__/
@@ -48,7 +46,6 @@ __pycache__/
 /delivery/
 /outputs/
 /.delivery-verification/
-/.claude/
 /.pytest*/
 /*.log
 /*.zip
